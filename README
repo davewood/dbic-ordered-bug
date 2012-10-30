@@ -1,0 +1,80 @@
+DROP TABLE IF EXISTS users: 
+CREATE TABLE users (
+  id INTEGER PRIMARY KEY NOT NULL,
+  name varchar NOT NULL
+): 
+CREATE UNIQUE INDEX users_name ON users (name): 
+DROP TABLE IF EXISTS tests: 
+CREATE TABLE tests (
+  id INTEGER PRIMARY KEY NOT NULL,
+  name varchar NOT NULL,
+  position int NOT NULL,
+  user_id int NOT NULL,
+  type varchar NOT NULL DEFAULT 'StandAlone',
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
+): 
+CREATE INDEX tests_idx_user_id ON tests (user_id): 
+CREATE UNIQUE INDEX tests_user_id_type_position ON tests (user_id, type, position): 
+INSERT INTO users ( name) VALUES ( ? ): 'john'
+SELECT me.position FROM tests me WHERE ( ( type = ? AND user_id = ? ) ) ORDER BY position DESC LIMIT ?: 'Default', '1', '1'
+INSERT INTO tests ( name, position, type, user_id) VALUES ( ?, ?, ?, ? ): 'Test0', '1', 'Default', '1'
+SELECT me.position FROM tests me WHERE ( ( type = ? AND user_id = ? ) ) ORDER BY position DESC LIMIT ?: 'Default', '1', '1'
+INSERT INTO tests ( name, position, type, user_id) VALUES ( ?, ?, ?, ? ): 'Test1', '2', 'Default', '1'
+SELECT me.position FROM tests me WHERE ( ( type = ? AND user_id = ? ) ) ORDER BY position DESC LIMIT ?: 'Default', '1', '1'
+INSERT INTO tests ( name, position, type, user_id) VALUES ( ?, ?, ?, ? ): 'Test2', '3', 'Default', '1'
+SELECT me.position FROM tests me WHERE ( ( type = ? AND user_id = ? ) ) ORDER BY position DESC LIMIT ?: 'Default', '1', '1'
+INSERT INTO tests ( name, position, type, user_id) VALUES ( ?, ?, ?, ? ): 'Test3', '4', 'Default', '1'
+SELECT COUNT( * ) FROM tests me WHERE ( me.user_id = ? ): '1'
+BEGIN WORK
+SELECT me.id, me.name, me.position, me.user_id, me.type FROM tests me WHERE ( me.user_id = ? ) ORDER BY user_id ASC, type ASC, position ASC: '1'
+SELECT me.position FROM tests me WHERE ( ( position > ? AND ( position != ? AND ( type = ? AND user_id = ? ) ) ) ) ORDER BY position DESC LIMIT ?: '1', '1', 'Default', '1', '1'
+UPDATE tests SET position = ? WHERE ( id = ? ): '0', '1'
+UPDATE tests SET position = position - 1 WHERE ( ( ( position BETWEEN ? AND ? ) AND ( type = ? AND user_id = ? ) ) ): '2', '4', 'Default', '1'
+UPDATE tests SET position = ? WHERE ( id = ? ): '4', '1'
+DELETE FROM tests WHERE ( id = ? ): '1'
+SELECT me.position FROM tests me WHERE ( ( position > ? AND ( position != ? AND ( type = ? AND user_id = ? ) ) ) ) ORDER BY position DESC LIMIT ?: '2', '2', 'Default', '1', '1'
+UPDATE tests SET position = ? WHERE ( id = ? ): '0', '2'
+UPDATE tests SET position = position - 1 WHERE ( ( ( position BETWEEN ? AND ? ) AND ( type = ? AND user_id = ? ) ) ): '3', '3', 'Default', '1'
+ROLLBACK
+
+#   Failed test 'tests delete lives.'
+#   at t/01_delete_tests_dies.t line 40.
+# died: DBIx::Class::Exception (DBI Exception: DBD::SQLite::st execute failed: columns user_id, type, position are not unique [for Statement "UPDATE tests SET position = position - 1 WHERE ( ( ( position BETWEEN ? AND ? ) AND ( type = ? AND user_id = ? ) ) )"] at /home/dt/perl5/perlbrew/perls/perl-5.16.0/lib/site_perl/5.16.0/DBIx/Class/Schema.pm line 1101.
+# 	DBIx::Class::Schema::throw_exception() called at /home/dt/perl5/perlbrew/perls/perl-5.16.0/lib/site_perl/5.16.0/DBIx/Class/Storage.pm line 112
+# 	DBIx::Class::Storage::throw_exception() called at /home/dt/perl5/perlbrew/perls/perl-5.16.0/lib/site_perl/5.16.0/DBIx/Class/Storage/DBI.pm line 1315
+# 	DBIx::Class::Storage::DBI::__ANON__() called at /home/dt/perl5/perlbrew/perls/perl-5.16.0/lib/site_perl/5.16.0/DBIx/Class/Storage/DBI.pm line 1644
+# 	DBIx::Class::Storage::DBI::_dbh_execute() called at /home/dt/perl5/perlbrew/perls/perl-5.16.0/lib/site_perl/5.16.0/DBIx/Class/Storage/DBI.pm line 792
+# 	DBIx::Class::Storage::DBI::dbh_do() called at /home/dt/perl5/perlbrew/perls/perl-5.16.0/lib/site_perl/5.16.0/DBIx/Class/Storage/DBI.pm line 1609
+# 	DBIx::Class::Storage::DBI::_execute() called at /home/dt/perl5/perlbrew/perls/perl-5.16.0/lib/site_perl/5.16.0/DBIx/Class/Storage/DBI.pm line 2125
+# 	DBIx::Class::Storage::DBI::update() called at /home/dt/perl5/perlbrew/perls/perl-5.16.0/lib/site_perl/5.16.0/DBIx/Class/ResultSet.pm line 1792
+# 	DBIx::Class::ResultSet::_rs_update_delete() called at /home/dt/perl5/perlbrew/perls/perl-5.16.0/lib/site_perl/5.16.0/DBIx/Class/ResultSet.pm line 1930
+# 	DBIx::Class::ResultSet::update() called at /home/dt/perl5/perlbrew/perls/perl-5.16.0/lib/site_perl/5.16.0/DBIx/Class/Ordered.pm line 708
+# 	DBIx::Class::Ordered::_shift_siblings() called at /home/dt/perl5/perlbrew/perls/perl-5.16.0/lib/site_perl/5.16.0/DBIx/Class/Ordered.pm line 402
+# 	DBIx::Class::Ordered::move_to() called at /home/dt/perl5/perlbrew/perls/perl-5.16.0/lib/site_perl/5.16.0/DBIx/Class/Ordered.pm line 351
+# 	DBIx::Class::Ordered::move_last() called at /home/dt/perl5/perlbrew/perls/perl-5.16.0/lib/site_perl/5.16.0/DBIx/Class/Ordered.pm line 582
+# 	DBIx::Class::Ordered::delete() called at /home/dt/perl5/perlbrew/perls/perl-5.16.0/lib/site_perl/5.16.0/DBIx/Class/ResultSet.pm line 2013
+# 	DBIx::Class::ResultSet::delete_all() called at t/01_delete_tests_dies.t line 40
+# 	Test::Exception::lives_ok() called at t/01_delete_tests_dies.t line 40
+# )
+# Looks like you failed 1 test of 8.
+t/01_delete_tests_dies.t .. 
+ok 1 - use EPPlication::Schema;
+create temporary db file: /tmp/EZplmPo6qO.sqlite
+ok 2 - Create user
+ok 3 - Created test 'Test0'
+ok 4 - Created test 'Test1'
+ok 5 - Created test 'Test2'
+ok 6 - Created test 'Test3'
+ok 7 - User has 4 tests
+not ok 8 - tests delete lives.
+1..8
+Dubious, test returned 1 (wstat 256, 0x100)
+Failed 1/8 subtests 
+
+Test Summary Report
+-------------------
+t/01_delete_tests_dies.t (Wstat: 256 Tests: 8 Failed: 1)
+  Failed test:  8
+  Non-zero exit status: 1
+Files=1, Tests=8,  1 wallclock secs ( 0.01 usr  0.01 sys +  0.27 cusr  0.03 csys =  0.32 CPU)
+Result: FAIL
